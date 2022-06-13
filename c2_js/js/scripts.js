@@ -28,7 +28,7 @@
       console.log("Acelerando a nafta...");
     }
   }
-  
+
   class AutoElectrico extends Auto {
     acelerar() {
       console.log("Acelerando de forma eléctrica...");
@@ -48,7 +48,7 @@
     Ejercicio asincrónico - Trabajando con Date()
   */
   function devolverFecha() {
-    let fecha = new Date().getDay();
+    const fecha = new Date().getDay();
     const dias = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
     const nombreDia = dias[fecha];
     alert(`El día de la semana es: "${nombreDia}"`);
