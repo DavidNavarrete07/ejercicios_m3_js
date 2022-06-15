@@ -13,14 +13,23 @@
             background: linear-gradient(90deg, rgba(106, 156, 29, 1) 0%, rgba(0, 150, 52, 1) 100%, rgba(0, 212, 255, 1) 100%);
         }
 
-        .pokemon-click {
+        .pokemon {
             text-align: center;
-            height: 30rem;
-            margin: 1.2rem;
+            height: auto;
+            margin: 1rem;
             box-shadow: 0 15px 25px rgba(129, 124, 124, 0.2);
-            border-radius: 5px;
+            border-radius: 10px;
             backdrop-filter: blur(14px);
             background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .modal-body img {
+            background: rgb(2, 0, 36);
+            box-shadow: 8px 0px rgba(26, 25, 25, 0.164);
+            background: linear-gradient(90deg, rgba(2, 0, 36, 1) 0%, rgba(19, 121, 9, 1) 0%, rgba(0, 212, 255, 1) 100%);
+            border-radius: 50%;
+            margin: 4px;
+            border: 4px rgb(0, 255, 191) solid;
         }
     </style>
 </head>
@@ -28,11 +37,28 @@
 <body>
     <div class="container-fluid">
         <div class="row">
-            <div class="col-8">
+            <div class="col-12">
                 <div class="row" id="pokemons">
                 </div>
             </div>
-            <div class="col-4" id="pokemon_search">
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="pokeModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold" id="exampleModalLabel">Modal title</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center">
+
+                </div>
+                <div class="modal-footer">
+                    <button id="modal-close" type="button" class="btn btn-secondary"
+                        data-bs-dismiss="modal">Cerrar</button>
+                </div>
             </div>
         </div>
     </div>
@@ -42,15 +68,31 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"
         integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
     <script>
-        let pokemons = document.querySelector("#pokemons");
+        const pokemons = document.querySelector("#pokemons");
+        const etiq_pokemon = document.querySelector("#pokemon_search");
+        const modal = document.querySelector("#pokeModal");
+        const modalClose = document.querySelector("#modal-close");
+        let locations_pokemon = [];
         // Función para crear las columnas
         function createColumnsPokemons(data) {
             let pokemons_api = data['results'];
-            for (let i = 1; i < pokemons_api.length; i++) {
+            // for(let i = 0; i < pokemons_api.length; i++){
+            //     console.log(pokemons_api[i]);
+            // }
+            let i = 0;
+            for (let pokemon of pokemons_api) {
+                i++;
                 let etiq = document.createElement("div");
-                etiq.classList.add('col-2');
+                etiq.classList.add('col-12', 'col-sm-6', 'col-md-4', 'col-lg-2');
                 // Agrego la etiqueta img sin necesidad de crear el elemento
-                etiq.insertAdjacentHTML("beforeend", `<img id="${i}" src="http://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/${i}.png">`);
+                etiq.insertAdjacentHTML("beforeend", `
+                <div class="card pokemon">
+                    <img id="${i}" onclick="searchPokemon(${i})" src="http://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/${i}.png">
+                    <div class="card-body">
+                        <h5><span class="badge bg-success text-uppercase fw-bold text-white">${pokemon.name}</span></h5>
+                    </div>
+                </div>
+                `);
                 pokemons.appendChild(etiq);
             }
         }
@@ -59,37 +101,29 @@
         $.getJSON('http://pokeapi.co/api/v2/pokemon?limit=151', function (data) {
             createColumnsPokemons(data);
         });
-        
-        // Funcion para crear todos los elementos relacionados a la tarjeta del Pokémon clickeado y luego agregarla al HTML
-        function createCardPokemonClick(id, data) {
-            const etiq_pokemon = document.querySelector("#pokemon_search");
-            // Tomo los tipos de ataques del Pokémon
+        // Función para abrir un modal con la información del pokémon especifico
+        function openModal(id, data) {
+            document.querySelector(".modal-title").textContent = "Pokémon N° " + id;
+            let modal_body = document.querySelector(".modal-body");
             const types_pokemon = data['types'];
-            let etiq = document.createElement("div");
-            etiq.classList.add("pokemon-click");
-            etiq.insertAdjacentHTML("beforeend", `<img height="200px" width="200px" id="${id}" src="http://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/${id}.png">`)
-            etiq.insertAdjacentHTML("beforeend", `<h4 class="text-center fw-bold text-uppercase">${data.name}</h4>`);
-            etiq.insertAdjacentHTML("beforeend", `<h5 class="text-uppercase fw-bold py-2">Tipos: </h5>`);
+            modal_body.innerHTML =
+                `<img height="200px" width="200px" id="${id}" src="http://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/${id}.png">
+            <h4 class="text-center fw-bold text-uppercase m-2">${data.name}</h4>
+            <h6 class="text-uppercase fw-bold">Tamaño: ${data.height}</h6>
+            <h6 class="text-uppercase fw-bold">Peso: ${data.weight}</h6>
+            <h6 class="text-uppercase fw-bold py-2">Tipos: </h6>
+            `;
             for (let type of types_pokemon) {
-                etiq.insertAdjacentHTML("beforeend",
+                modal_body.insertAdjacentHTML("beforeend",
                     `<h6 class="text-uppercase fw-bold">${type['type']['name']}</h6>`);
             }
-            etiq.insertAdjacentHTML("beforeend", `<h6 class="text-uppercase fw-bold">Tamaño: ${data.height}</h6>`);
-            etiq.insertAdjacentHTML("beforeend", `<h6 class="text-uppercase fw-bold">Peso: ${data.weight}</h6>`);
-            etiq_pokemon.appendChild(etiq);
+            $("#pokeModal").modal("show");
         }
-
-        // Evento que se ejecuta cuando hago click en algún Pokémon
-        pokemons.addEventListener('click', function (ev) {
-            let pokemon_id = document.querySelector("img").innerText = ev.target.id;
-            // Llamo a la función para buscar un Pokémon según el id
-            searchPokemon(pokemon_id);
-        });
 
         // Función que busca datos según el id del Pokémon
         function searchPokemon(id) {
             $.getJSON(`http://pokeapi.co/api/v2/pokemon/${id}`, function (data) {
-                createCardPokemonClick(id, data);
+                openModal(id, data);
             });
         }
     </script>
