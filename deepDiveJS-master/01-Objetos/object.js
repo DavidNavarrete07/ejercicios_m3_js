@@ -8,10 +8,12 @@ function setPropsOnObj(obj) {
             return num + 1;
         }
     }
-    obj.la = {
-        clave: {
-            secreta: {
-                es: 404
+    obj = {
+        la: {
+            clave: {
+                secreta: {
+                    es: 404
+                }
             }
         }
     }
